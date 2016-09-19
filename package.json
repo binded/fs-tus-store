@@ -37,9 +37,11 @@
     "blue-tape": "^1.0.0",
     "cz-conventional-changelog": "^1.2.0",
     "eslint-config-blockai": "^1.0.1",
+    "mkdirp": "^0.5.1",
     "nodemon": "^1.10.2",
     "rimraf": "^2.5.4",
-    "semantic-release": "^4.3.5"
+    "semantic-release": "^4.3.5",
+    "string-to-stream": "^1.1.0"
   },
   "release": {
     "debug": false,
@@ -51,5 +53,8 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "pump": "^1.0.1"
   }
 }

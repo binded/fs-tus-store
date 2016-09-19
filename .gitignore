@@ -33,6 +33,7 @@ node_modules
 
 # Temporary / data folders
 .tmp
+.data
 data/
 
 # Build directory

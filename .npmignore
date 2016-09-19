@@ -36,6 +36,7 @@ src/
 
 # Test directory
 test/
+.data
 
 .eslintrc
 .babelrc
