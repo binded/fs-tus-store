@@ -69,9 +69,12 @@ export default ({
     })
   })
 
+  const createReadStream = (key) => fs.createReadStream(keyPath(key))
+
   return {
     info,
     create,
     write,
+    createReadStream,
   }
 }
