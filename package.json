@@ -56,6 +56,13 @@
     }
   },
   "dependencies": {
-    "pump": "^1.0.1"
+    "abstract-tus-store": "^1.1.0",
+    "common-streams": "^1.2.0",
+    "concat-stream": "^1.5.2",
+    "debug": "^2.2.0",
+    "fs-blob-store": "^5.2.1",
+    "meterstream": "^1.0.1",
+    "string-to-stream": "^1.1.0",
+    "uuid": "^2.0.3"
   }
 }
