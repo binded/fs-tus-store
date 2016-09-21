@@ -14,21 +14,12 @@ Requires Node v6+
 
 ## Usage
 
-See [./test](./test) directory for usage examples.
-
-All methods return promises.
-
-### Creating client
-
 ```javascript
-import initFsStore from 'tus-fs-store'
-const store  = initFsStore({ directory: './path/to/base/directory' })
+import fsTusStore from 'fs-tus-store'
+
+const store = fsTusStore({ directory: './data' })
 ```
 
-### info(key)
-
-Resolves to an `{ uploadOffset[, uploadLength, uploadMetadata] }` object.
-
-### create(key[, { uploadLength, uploadMetadata }])
-
-### write(key, readStream)
+See
+[abstract-tus-store](https://github.com/blockai/abstract-tus-store#api)
+for API documentation.
