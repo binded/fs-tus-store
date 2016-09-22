@@ -12,6 +12,30 @@ import { join, resolve as resolvePath } from 'path'
 
 const debug = initDebug('fs-tus-store')
 
+// promisify fs...
+const symlink = (target, path) => new Promise((resolve, reject) => {
+  fs.symlink(target, path, (err) => {
+    if (err) return reject(err)
+    resolve()
+  })
+})
+const unlink = (path) => new Promise((resolve, reject) => {
+  fs.unlink(path, (err) => {
+    if (err) return reject(err)
+    resolve()
+  })
+})
+const forceSymlink = async (target, path) => {
+  try {
+    await symlink(target, path)
+  } catch (err) {
+    if (err.code === 'EEXIST') {
+      await unlink(path)
+      await symlink(target, path)
+    }
+  }
+}
+
 // TODO: prevent concurrent operations...
 export default ({
   directory = '.fs-tus-store',
@@ -22,6 +46,7 @@ export default ({
   const keyToPath = (key) => join(absoluteDir, key)
   const uploadIdToKey = (uploadId) => `.uploads/${uploadId}.info`
   const uploadIdToDataKey = (uploadId) => `.uploads/${uploadId}`
+  const keyToUploadKey = (key) => `${key}.upload`
 
   const put = (key, data) => new Promise((resolve, reject) => {
     const ws = blobStore.createWriteStream(key, (err) => {
@@ -57,6 +82,19 @@ export default ({
     return JSON.parse(json)
   }
 
+  const getUploadFromKey = async (key) => {
+    const json = await new Promise((resolve, reject) => {
+      const uploadKey = keyToUploadKey(key)
+      blobStore
+        .createReadStream(uploadKey)
+        .on('error', reject)
+        .pipe(concat((result) => {
+          resolve(result)
+        }))
+    })
+    return JSON.parse(json)
+  }
+
   // TODO: fail if key already exists?
   const create = async (key, {
     uploadLength,
@@ -72,14 +110,16 @@ export default ({
     return { uploadId }
   }
 
+  const filesize = (path) => new Promise((resolve, reject) => {
+    fs.stat(path, (err, stats) => {
+      if (err) return reject(err)
+      resolve(stats.size)
+    })
+  })
+
   const getUploadOffset = async (uploadId) => {
     const key = uploadIdToDataKey(uploadId)
-    return new Promise((resolve, reject) => {
-      fs.stat(keyToPath(key), (err, stats) => {
-        if (err) return reject(err)
-        resolve(stats.size)
-      })
-    })
+    return filesize(keyToPath(key))
   }
 
   const info = async uploadId => {
@@ -109,6 +149,8 @@ export default ({
   const completeUpload = async (uploadId, upload) => {
     const oldPath = keyToPath(uploadIdToDataKey(uploadId))
     const newPath = keyToPath(upload.key)
+    const uploadResourcePath = keyToPath(uploadIdToKey(uploadId))
+    await forceSymlink(uploadResourcePath, keyToPath(keyToUploadKey(upload.key)))
     return new Promise((resolve, reject) => {
       fs.rename(oldPath, newPath, (err) => {
         if (err) return reject(err)
@@ -154,12 +196,27 @@ export default ({
     const newOffset = offset + bytesWritten
     if (newOffset === upload.uploadLength) {
       await completeUpload(uploadId, upload)
-      return { offset: newOffset, complete: true }
+      return {
+        offset: newOffset,
+        complete: true,
+        upload: {
+          ...upload,
+          offset: newOffset,
+        },
+      }
     }
     return { offset: newOffset }
   }
 
-  const createReadStream = (key) => blobStore.createReadStream(key)
+  const createReadStream = (key, onInfo) => {
+    const getInfo = async () => {
+      const contentLength = await filesize(keyToPath(key))
+      const { metadata } = await getUploadFromKey(key)
+      onInfo({ contentLength, metadata })
+    }
+    if (onInfo) getInfo()
+    return blobStore.createReadStream(key)
+  }
 
   return {
     info,
