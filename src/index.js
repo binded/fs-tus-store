@@ -7,8 +7,9 @@ import fsBlobStore from 'fs-blob-store'
 import initDebug from 'debug'
 import concat from 'concat-stream'
 import MeterStream from 'meterstream'
+import mkdirpCb from 'mkdirp'
 import { SizeStream } from 'common-streams'
-import { join, resolve as resolvePath } from 'path'
+import { join, resolve as resolvePath, dirname } from 'path'
 
 const debug = initDebug('fs-tus-store')
 
@@ -25,8 +26,15 @@ const unlink = (path) => new Promise((resolve, reject) => {
     resolve()
   })
 })
+const mkdirp = (path) => new Promise((resolve, reject) => {
+  mkdirpCb(path, (err) => {
+    if (err) return reject(err)
+    resolve()
+  })
+})
 const forceSymlink = async (target, path) => {
   try {
+    await mkdirp(dirname(path))
     await symlink(target, path)
   } catch (err) {
     if (err.code === 'EEXIST') {

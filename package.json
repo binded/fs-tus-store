@@ -20,7 +20,16 @@
     "type": "git",
     "url": "git+https://github.com/blockai/fs-tus-store.git"
   },
-  "keywords": ["tus", "resumable", "upload", "abstract-tus-store", "store", "filesystem", "fs", "local"],
+  "keywords": [
+    "tus",
+    "resumable",
+    "upload",
+    "abstract-tus-store",
+    "store",
+    "filesystem",
+    "fs",
+    "local"
+  ],
   "author": "Oli Lalonde <olalonde@gmail.com> (https://syskall.com/)",
   "license": "MIT",
   "bugs": {
@@ -61,6 +70,7 @@
     "debug": "^2.2.0",
     "fs-blob-store": "^5.2.1",
     "meterstream": "^1.0.1",
+    "mkdirp": "^0.5.1",
     "string-to-stream": "^1.1.0",
     "uuid": "^2.0.3"
   }
