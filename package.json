@@ -1,6 +1,6 @@
 {
   "name": "fs-tus-store",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "",
   "main": "./lib/index.js",
   "directories": {
@@ -64,7 +64,7 @@
     }
   },
   "dependencies": {
-    "abstract-tus-store": "^1.4.0",
+    "abstract-tus-store": "^1.5.0",
     "common-streams": "^1.2.0",
     "concat-stream": "^1.5.2",
     "debug": "^2.2.0",

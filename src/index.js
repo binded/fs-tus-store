@@ -154,7 +154,8 @@ export default ({
     return meterStream
   }
 
-  const completeUpload = async (uploadId, upload) => {
+  const completeUpload = async (uploadId, upload, beforeComplete) => {
+    await beforeComplete(upload, uploadId)
     const oldPath = keyToPath(uploadIdToDataKey(uploadId))
     const newPath = keyToPath(upload.key)
     const uploadResourcePath = keyToPath(uploadIdToKey(uploadId))
@@ -175,6 +176,7 @@ export default ({
       }
       return { expectedOffset: arg3, opts: arg4 }
     })()
+    const { beforeComplete = async () => {} } = opts
     // need to do this asap to make sure we don't miss reads
     const through = rs.pipe(new PassThrough())
 
@@ -203,7 +205,7 @@ export default ({
     })
     const newOffset = offset + bytesWritten
     if (newOffset === upload.uploadLength) {
-      await completeUpload(uploadId, upload)
+      await completeUpload(uploadId, upload, beforeComplete)
       return {
         offset: newOffset,
         complete: true,
